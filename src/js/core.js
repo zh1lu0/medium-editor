@@ -63,7 +63,9 @@
                 // in a header
                 isHeader.test(tagName) &&
                 // at the very end of the block
+
                 MediumEditor.selection.getCaretOffsets(node).left === 0) {
+
             if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.BACKSPACE) && isEmpty.test(node.previousElementSibling.innerHTML)) {
                 // backspacing the begining of a header into an empty previous element will
                 // change the tagName of the current node to prevent one
@@ -168,7 +170,8 @@
 
     function handleKeyup(event) {
         var node = MediumEditor.selection.getSelectionStart(this.options.ownerDocument),
-            tagName;
+            p,tagName;
+        var isHeader = /h\d/i;
 
         if (!node) {
             return;
@@ -195,6 +198,31 @@
                 this.options.ownerDocument.execCommand('formatBlock', false, 'p');
             }
         }
+
+        if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.ENTER) && event.shiftKey ){
+            tagName = node.nodeName.toLowerCase();
+            if(isHeader.test(tagName)) {
+                [].forEach.call(node.querySelectorAll('br'),function(e){
+                  e.parentNode.removeChild(e);
+                });
+
+
+                p = this.options.ownerDocument.createElement('p');
+                p.innerHTML = '<br>';
+
+                if (node.nextSibling) {
+                  node.parentElement.insertBefore(p, node.nextSibling);
+                }
+                else {
+                  node.parentNode.appendChild(p);
+                }
+
+                // move the cursor into the new paragraph
+                MediumEditor.selection.moveCursor(this.options.ownerDocument, p);
+            }
+        }
+
+
     }
 
     function handleEditableInput(event, editable) {
