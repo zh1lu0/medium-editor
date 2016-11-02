@@ -57,7 +57,36 @@
             isEmpty = /^(\s+|<br\/?>)?$/i,
             isHeader = /h\d/i;
 
-        if (MediumEditor.util.isKey(event, [MediumEditor.util.keyCode.BACKSPACE, MediumEditor.util.keyCode.ENTER]) &&
+          if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.ENTER) && event.shiftKey){
+
+              event.preventDefault();
+              tagName = node.nodeName.toLowerCase();
+              if(isHeader.test(tagName)) {
+
+                  if(MediumEditor.selection.getCaretOffsets(node).right===0){
+
+                    p = this.options.ownerDocument.createElement('p');
+                    p.innerHTML = '<br>';
+
+                    if (node.nextSibling) {
+                      node.parentElement.insertBefore(p, node.nextSibling);
+                    } else {
+                      node.parentNode.appendChild(p);
+                    }
+
+                    // move the cursor into the new paragraph
+                    MediumEditor.selection.moveCursor(this.options.ownerDocument, p);
+
+                  } else if (MediumEditor.selection.getCaretOffsets(node).right!==0
+                    && MediumEditor.selection.getCaretOffsets(node).left!==0) {
+
+                      var ev = document.createEvent('KeyboardEvent');
+                      // Send key '13' (= enter)
+                      ev.initKeyEvent('keydown', true, true, window, false, false, false, false, 13, 0);
+                      document.dispatchEvent(ev);
+                  }
+              }
+            } else if (MediumEditor.util.isKey(event, [MediumEditor.util.keyCode.BACKSPACE, MediumEditor.util.keyCode.ENTER]) &&
                 // has a preceeding sibling
                 node.previousElementSibling &&
                 // in a header
@@ -170,8 +199,7 @@
 
     function handleKeyup(event) {
         var node = MediumEditor.selection.getSelectionStart(this.options.ownerDocument),
-            p,tagName;
-        var isHeader = /h\d/i;
+            tagName;
 
         if (!node) {
             return;
@@ -198,31 +226,6 @@
                 this.options.ownerDocument.execCommand('formatBlock', false, 'p');
             }
         }
-
-        if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.ENTER) && event.shiftKey ){
-            tagName = node.nodeName.toLowerCase();
-            if(isHeader.test(tagName)) {
-                [].forEach.call(node.querySelectorAll('br'),function(e){
-                  e.parentNode.removeChild(e);
-                });
-
-
-                p = this.options.ownerDocument.createElement('p');
-                p.innerHTML = '<br>';
-
-                if (node.nextSibling) {
-                  node.parentElement.insertBefore(p, node.nextSibling);
-                }
-                else {
-                  node.parentNode.appendChild(p);
-                }
-
-                // move the cursor into the new paragraph
-                MediumEditor.selection.moveCursor(this.options.ownerDocument, p);
-            }
-        }
-
-
     }
 
     function handleEditableInput(event, editable) {
