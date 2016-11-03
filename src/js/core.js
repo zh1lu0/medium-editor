@@ -64,7 +64,7 @@
               if(isHeader.test(tagName)) {
 
                   if(MediumEditor.selection.getCaretOffsets(node).right===0){
-
+                    //in the end of header, add a new paragraph after the header
                     p = this.options.ownerDocument.createElement('p');
                     p.innerHTML = '<br>';
 
@@ -77,15 +77,28 @@
                     // move the cursor into the new paragraph
                     MediumEditor.selection.moveCursor(this.options.ownerDocument, p);
 
-                  } else if (MediumEditor.selection.getCaretOffsets(node).right!==0
-                    && MediumEditor.selection.getCaretOffsets(node).left!==0) {
+                  } else if (MediumEditor.selection.getCaretOffsets(node).left===0) {
+                    //in the beginning of header, add a new paragraph before the header
+                    p = this.options.ownerDocument.createElement('p');
+                    p.innerHTML = '<br>';
+                    node.parentElement.insertBefore(p, node);
 
-                      var ev = document.createEvent('KeyboardEvent');
+                  } else {
+
+                      var ev = MediumEditor.selection.getFocusedElement().createEvent('Event');
                       // Send key '13' (= enter)
-                      ev.initKeyEvent('keydown', true, true, window, false, false, false, false, 13, 0);
-                      document.dispatchEvent(ev);
+                      ev.initEvent('keydown', true, true);
+                      ev.keyCode = 13;
+                      MediumEditor.selection.getFocusedElement().dispatchEvent(ev);
                   }
               }
+            } else if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.ENTER) && MediumEditor.selection.getCaretOffsets(node).left===0) {
+              //in the beginning of header, add a new paragraph before the header
+              p = this.options.ownerDocument.createElement('p');
+              p.innerHTML = '<br>';
+              node.parentElement.insertBefore(p, node);
+              event.preventDefault();
+
             } else if (MediumEditor.util.isKey(event, [MediumEditor.util.keyCode.BACKSPACE, MediumEditor.util.keyCode.ENTER]) &&
                 // has a preceeding sibling
                 node.previousElementSibling &&
