@@ -59,7 +59,7 @@
 
           if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.ENTER) && event.shiftKey){
 
-              event.preventDefault();
+
               tagName = node.nodeName.toLowerCase();
               if(isHeader.test(tagName)) {
 
@@ -76,20 +76,39 @@
 
                     // move the cursor into the new paragraph
                     MediumEditor.selection.moveCursor(this.options.ownerDocument, p);
+                    event.preventDefault();
 
                   } else if (MediumEditor.selection.getCaretOffsets(node).left===0) {
                     //in the beginning of header, add a new paragraph before the header
                     p = this.options.ownerDocument.createElement('p');
                     p.innerHTML = '<br>';
                     node.parentElement.insertBefore(p, node);
-
+                    event.preventDefault();
                   } else {
 
-                      var ev = MediumEditor.selection.getFocusedElement().createEvent('Event');
-                      // Send key '13' (= enter)
-                      ev.initEvent('keydown', true, true);
-                      ev.keyCode = 13;
-                      MediumEditor.selection.getFocusedElement().dispatchEvent(ev);
+                    event.preventDefault();
+                    var range = window.getSelection().getRangeAt(0);
+                    var selectionContents = range.extractContents();
+
+                    console.log(range);
+                    //in the end of header, add a new paragraph after the header
+                    /*var firstp = node.innerHTML.substring(0, range.endOffset);
+                    var sencondp = node.innerHTML.substring(range.endOffset);
+
+                    node.innerHTML=firstp;
+
+                    p = this.options.ownerDocument.createElement(tagName);
+                    p.innerHTML = sencondp;
+
+                    if (node.nextSibling) {
+                      node.parentElement.insertBefore(p, node.nextSibling);
+                    } else {
+                      node.parentNode.appendChild(p);
+                    }
+
+                    // move the cursor into the new paragraph
+                    MediumEditor.selection.moveCursor(this.options.ownerDocument, p);*/
+
                   }
               }
             } else if (MediumEditor.util.isKey(event, MediumEditor.util.keyCode.ENTER) && MediumEditor.selection.getCaretOffsets(node).left===0) {
